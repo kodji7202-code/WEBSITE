@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ShoppingCart,
@@ -16,13 +16,18 @@ import {
 } from 'lucide-react';
 import { Track, View, SoundKit, CartItem, License } from './types';
 import { cn, formatTime } from './lib/utils';
+import { supabase } from './lib/supabase';
+
+// Critical Components (Static Import)
 import TrackCard from './components/TrackCard';
 import HeroSection from './components/HeroSection';
 import HowItWorks from './components/HowItWorks';
 import Testimonials from './components/Testimonials';
 import FAQ from './components/FAQ';
-import { supabase } from './lib/supabase';
-import React, { useState, useMemo, useEffect, useRef, Suspense } from 'react';
+import Services from './components/Services';
+import PerspectiveSection from './components/PerspectiveSection';
+import Footer from './components/Footer';
+import CheckoutModal from './components/CheckoutModal';
 
 // Lazy Load Heavy/Secondary Components
 const AdminDashboard = React.lazy(() => import('./components/AdminDashboard'));
