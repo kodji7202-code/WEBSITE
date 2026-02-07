@@ -170,17 +170,23 @@ const HeroSection: React.FC<HeroSectionProps> = ({ selectedGenre, onSelectGenre,
     >
       {/* Background Container - FULL WIDTH EDGE-TO-EDGE */}
       <div className="absolute inset-0 z-0 w-full h-full overflow-hidden">
-        <motion.div
+        <motion.img
           style={{
             y: backgroundY,
             scale: backgroundScale,
-            backgroundImage: `url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&q=80&w=2000')`,
-            backgroundPosition: 'center 40%'
           }}
+          src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&q=80&w=2000"
+          srcSet="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&q=80&w=640 640w,
+                  https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&q=80&w=1200 1200w,
+                  https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&q=80&w=2000 2000w"
+          sizes="100vw"
+          alt="Studio Background"
           initial={{ scale: 1.4, opacity: 0 }}
           animate={{ scale: 1.1, opacity: 1 }}
           transition={{ duration: 1.8, ease: "easeOut" }}
-          className="w-full h-full bg-cover bg-no-repeat grayscale-[0.4] contrast-[1.1] brightness-[0.6] blur-[1px]"
+          className="w-full h-full object-cover grayscale-[0.4] contrast-[1.1] brightness-[0.6] blur-[1px]"
+          // @ts-ignore
+          fetchPriority="high"
         />
 
         {/* Cinematic Film Grain Texture Overlay */}
