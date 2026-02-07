@@ -155,16 +155,24 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, total, b
       console.log("Error Object:", error);
 
       if (error) {
-        // Extract body if possible
+        console.error("Supabase Invoke Error Details:", error);
+
+        // Default generic message
         let errorMessage = error.message;
-        try {
-          // Sometimes error body is hidden in context
-          if (error.context && error.context.json) {
-            const body = await error.context.json();
-            console.log("Error Body:", body);
-            if (body.error) errorMessage = body.error;
+
+        // Try to extract the actual JSON error body from the response if available
+        // The Supabase client wraps the response in 'context' for non-2xx errors
+        if (error && typeof (error as any).context?.json === 'function') {
+          try {
+            const body = await (error as any).context.json();
+            console.log("Error Response Body:", body);
+            if (body && body.error) {
+              errorMessage = body.error;
+            }
+          } catch (e) {
+            console.warn("Could not parse error body JSON", e);
           }
-        } catch (e) { /* ignore */ }
+        }
 
         throw new Error(errorMessage || "Failed to create checkout session");
       }
