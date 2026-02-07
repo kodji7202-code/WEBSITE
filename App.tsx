@@ -568,14 +568,22 @@ const App: React.FC = () => {
         ) : null;
 
       case 'Services':
-        return <Services onBookNow={() => setCurrentView('Contact')} />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <Services onBookNow={() => setCurrentView('Contact')} />
+          </Suspense>
+        );
 
       case 'Contact':
       case 'FAQ':
-        return <FAQ
-          onContactClick={() => setCurrentView('Contact')}
-          isContactMode={currentView === 'Contact'}
-        />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <FAQ
+              onContactClick={() => setCurrentView('Contact')}
+              isContactMode={currentView === 'Contact'}
+            />
+          </Suspense>
+        );
 
       // ... (existing imports, skipping to renderContent switch)
 
