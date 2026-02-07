@@ -90,12 +90,12 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, availableLicenses, isActiv
         )}
         onClick={() => onPlay(track)}
       >
-        {/* Spotlight Effect */}
+        {/* Spotlight Effect - Intensified */}
         <div
           className="pointer-events-none absolute -inset-px transition-opacity duration-300 z-0"
           style={{
             opacity,
-            background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, rgba(255,255,255,0.06), transparent 40%)`
+            background: `radial-gradient(500px circle at ${position.x}px ${position.y}px, rgba(168,85,247,0.15), transparent 40%)`
           }}
         />
         
