@@ -168,7 +168,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ selectedGenre, onSelectGenre,
       ref={containerRef}
       className="relative w-full min-h-[600px] md:min-h-[800px] mb-20 overflow-hidden flex flex-col items-center justify-center"
     >
-      {/* Background Container - FULL WIDTH EDGE-TO-EDGE */}
+      {/* Background Container - FULL WIDTH EDGE-TO-EDGE - Optimized for LCP */}
       <div className="absolute inset-0 z-0 w-full h-full overflow-hidden">
         <motion.img
           style={{
