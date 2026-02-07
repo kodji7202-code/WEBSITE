@@ -18,16 +18,18 @@ import { Track, View, SoundKit, CartItem, License } from './types';
 import { cn, formatTime } from './lib/utils';
 import { supabase } from './lib/supabase';
 
-// Critical Components (Static Import)
+// Critical Components (Static Import) - Only Hero and TrackCard needed for LCP
 import TrackCard from './components/TrackCard';
 import HeroSection from './components/HeroSection';
-import HowItWorks from './components/HowItWorks';
-import Testimonials from './components/Testimonials';
-import FAQ from './components/FAQ';
-import Services from './components/Services';
-import PerspectiveSection from './components/PerspectiveSection';
 import Footer from './components/Footer';
-import CheckoutModal from './components/CheckoutModal';
+
+// Lazy Load Secondary Components (Below Fold)
+const HowItWorks = React.lazy(() => import('./components/HowItWorks'));
+const Testimonials = React.lazy(() => import('./components/Testimonials'));
+const FAQ = React.lazy(() => import('./components/FAQ'));
+const Services = React.lazy(() => import('./components/Services'));
+const PerspectiveSection = React.lazy(() => import('./components/PerspectiveSection'));
+const CheckoutModal = React.lazy(() => import('./components/CheckoutModal'));
 
 // Lazy Load Heavy/Secondary Components
 const AdminDashboard = React.lazy(() => import('./components/AdminDashboard'));
