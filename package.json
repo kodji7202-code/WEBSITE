@@ -10,17 +10,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.7",
     "@google/genai": "*",
     "@stripe/stripe-js": "^4.1.0",
+    "@supabase/supabase-js": "^2.39.7",
+    "@vercel/analytics": "^1.6.1",
     "clsx": "^2.1.0",
     "d3": "^7.8.5",
     "framer-motion": "^11.0.8",
     "lucide-react": "^0.344.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "tailwind-merge": "^2.2.1",
-    "@vercel/analytics": "^1.2.2"
+    "tailwind-merge": "^2.2.1"
   },
   "devDependencies": {
     "@types/d3": "^7.4.3",

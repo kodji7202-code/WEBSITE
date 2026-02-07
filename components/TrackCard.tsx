@@ -15,6 +15,20 @@ interface TrackCardProps {
 
 const TrackCard: React.FC<TrackCardProps> = ({ track, availableLicenses, isActive, isInCart, onPlay, onAddToCart }) => {
   const [showLicenses, setShowLicenses] = useState(false);
+  const divRef = React.useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [opacity, setOpacity] = useState(0);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!divRef.current) return;
+    const rect = divRef.current.getBoundingClientRect();
+    setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    setOpacity(1);
+  };
+
+  const handleMouseLeave = () => {
+    setOpacity(0);
+  };
 
   // Dynamic License Availability Logic
   const trackLicenses = useMemo(() => {
@@ -61,18 +75,33 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, availableLicenses, isActiv
   return (
     <div className={cn("relative mb-2", showLicenses ? "z-[100]" : "z-10 hover:z-20")}>
       <motion.div
+        ref={divRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
         variants={cardVariants}
         initial="initial"
         animate="animate"
         whileHover="hover"
         className={cn(
-          "group flex items-center gap-4 p-3 rounded-xl transition-all duration-300 border cursor-pointer relative",
+          "group flex items-center gap-4 p-3 rounded-xl transition-all duration-300 border cursor-pointer relative overflow-hidden",
           isActive
             ? "bg-dark-card border-primary/40 shadow-xl shadow-primary/10"
             : "bg-dark-soft/40 border-white/5 hover:bg-dark-soft/60"
         )}
         onClick={() => onPlay(track)}
       >
+        {/* Spotlight Effect */}
+        <div
+          className="pointer-events-none absolute -inset-px transition-opacity duration-300 z-0"
+          style={{
+            opacity,
+            background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, rgba(255,255,255,0.06), transparent 40%)`
+          }}
+        />
+        
+        {/* Content Container (z-10 to sit above spotlight) */}
+        <div className="relative z-10 flex items-center gap-4 flex-grow min-w-0">
+        
         {/* Play Icon/Cover */}
         <div className="relative w-14 h-14 flex-shrink-0 overflow-hidden rounded-lg border border-white/10">
           <img
@@ -210,6 +239,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, availableLicenses, isActiv
           >
             {isInCart ? <Check className="w-5 h-5" aria-hidden="true" /> : <ShoppingCart className="w-4 h-4" aria-hidden="true" />}
           </motion.button>
+        </div>
         </div>
       </motion.div>
     </div>
