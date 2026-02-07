@@ -75,11 +75,14 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, availableLicenses, isActiv
       >
         {/* Play Icon/Cover */}
         <div className="relative w-14 h-14 flex-shrink-0 overflow-hidden rounded-lg border border-white/10">
-          <motion.img
-            variants={imageVariants}
+          <img
             src={track.coverUrl}
-            alt={track.title}
-            className="w-full h-full object-cover"
+            alt={`Cover art for ${track.title}`}
+            loading="lazy"
+            decoding="async"
+            width={56}
+            height={56}
+            className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-110"
           />
           <div className={cn(
             "absolute inset-0 bg-black/50 flex items-center justify-center transition-opacity",
@@ -99,9 +102,9 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, availableLicenses, isActiv
           </h4>
           <div className="flex items-center gap-2 mt-0.5 overflow-hidden whitespace-nowrap">
             <span className="text-[10px] text-gray-500 font-bold">@{track.artist}</span>
-            <span className="text-gray-800">•</span>
+            <span className="text-gray-800" aria-hidden="true">•</span>
             <div className="flex items-center gap-1.5">
-              <Tag className="w-2.5 h-2.5 text-primary" />
+              <Tag className="w-2.5 h-2.5 text-primary" aria-hidden="true" />
               <span className="text-[9px] uppercase font-black text-gray-400 tracking-wider">{track.genre}</span>
             </div>
           </div>
@@ -124,11 +127,14 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, availableLicenses, isActiv
           {trackLicenses.length > 0 && activeLicense ? (
             <div className="relative">
               <button
-                onClick={() => setShowLicenses(!showLicenses)}
+                onClick={(e) => { e.stopPropagation(); setShowLicenses(!showLicenses); }}
                 className="flex items-center gap-3 px-4 py-2.5 bg-dark-card border border-white/10 rounded-lg text-xs font-black text-white hover:bg-white/5 transition-all shadow-lg active:scale-95"
+                aria-label={`Select license for ${track.title}. Current: ${activeLicense.name} at $${activeLicense.price}`}
+                aria-expanded={showLicenses}
+                aria-haspopup="listbox"
               >
                 <span className="tracking-tighter">${activeLicense.price}</span>
-                <ChevronDown className={cn("w-3 h-3 text-gray-500 transition-transform", showLicenses && "rotate-180")} />
+                <ChevronDown className={cn("w-3 h-3 text-gray-500 transition-transform", showLicenses && "rotate-180")} aria-hidden="true" />
               </button>
 
               <AnimatePresence>
@@ -136,18 +142,22 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, availableLicenses, isActiv
                   <>
                     <div
                       className="fixed inset-0 z-40 bg-transparent"
-                      onClick={() => setShowLicenses(false)}
+                      onClick={(e) => { e.stopPropagation(); setShowLicenses(false); }}
+                      aria-hidden="true"
                     />
                     <motion.div
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
                       className="absolute right-0 top-full mt-2 w-56 bg-dark-card border border-white/10 rounded-xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-50 ring-1 ring-white/5"
+                      role="listbox"
+                      aria-label="License options"
                     >
                       {trackLicenses.map((lic) => (
                         <button
                           key={lic.id}
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setSelectedLicense(lic);
                             setShowLicenses(false);
                           }}
@@ -155,6 +165,8 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, availableLicenses, isActiv
                             "w-full px-4 py-4 text-left hover:bg-primary/10 transition-all border-b border-white/5 last:border-none group/item",
                             (activeLicense.id === lic.id) ? "bg-primary/5" : ""
                           )}
+                          role="option"
+                          aria-selected={activeLicense.id === lic.id}
                         >
                           <div className="flex justify-between items-center mb-1">
                             <span className={cn(
@@ -174,8 +186,8 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, availableLicenses, isActiv
               </AnimatePresence>
             </div>
           ) : (
-            <div className="px-3 py-2 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2">
-              <AlertCircle size={14} className="text-red-500" />
+            <div className="px-3 py-2 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2" role="alert" aria-label="Not available">
+              <AlertCircle size={14} className="text-red-500" aria-hidden="true" />
               <span className="text-[9px] font-black uppercase text-red-500 tracking-wider">Unavail.</span>
             </div>
           )}
@@ -183,7 +195,10 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, availableLicenses, isActiv
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => activeLicense && onAddToCart(track, activeLicense)}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (activeLicense) onAddToCart(track, activeLicense);
+            }}
             disabled={!activeLicense || trackLicenses.length === 0}
             className={cn(
               "flex items-center justify-center w-10 h-10 rounded-lg transition-all shadow-xl",
@@ -191,8 +206,9 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, availableLicenses, isActiv
                 ? "bg-green-500 text-white shadow-green-500/20"
                 : "bg-primary text-white shadow-primary/20 hover:bg-primary/80 disabled:bg-gray-700 disabled:shadow-none disabled:cursor-not-allowed"
             )}
+            aria-label={isInCart ? "Remove from cart" : `Add ${track.title} to cart`}
           >
-            {isInCart ? <Check className="w-5 h-5" /> : <ShoppingCart className="w-4 h-4" />}
+            {isInCart ? <Check className="w-5 h-5" aria-hidden="true" /> : <ShoppingCart className="w-4 h-4" aria-hidden="true" />}
           </motion.button>
         </div>
       </motion.div>

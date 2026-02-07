@@ -87,17 +87,30 @@ const TiltCard: React.FC<TiltCardProps> = ({ genre, isSelected, onClick }) => {
           ? "ring-2 ring-primary shadow-[0_0_50px_rgba(168,85,247,0.4)]"
           : "shadow-2xl hover:shadow-[0_20px_40px_rgba(0,0,0,0.6)]"
       )}
+      role="button"
+      aria-label={`Select ${genre.name} genre`}
+      aria-pressed={isSelected}
     >
-      {/* 1. Background Image Layer (Deepest) */}
-      <motion.div
-        className="absolute inset-0 bg-cover bg-center transition-transform duration-300 ease-out"
+      {/* 1. Background Image Layer (Deepest) - Switched to IMG for SEO/Performance */}
+      <motion.div 
+        className="absolute inset-0 pointer-events-none"
         style={{
-          backgroundImage: `url(${genre.image})`,
-          transform: "scale(1.15) translateZ(-40px)", // Push back and scale up to cover gaps
-          x: useTransform(contentX, (val) => typeof val === 'number' ? val * -1.5 : 0), // Move opposite to content
+          scale: 1.15,
+          z: -40, // Push back
+          x: useTransform(contentX, (val) => typeof val === 'number' ? val * -1.5 : 0), 
           y: useTransform(contentY, (val) => typeof val === 'number' ? val * -1.5 : 0)
         }}
-      />
+      >
+         <img 
+            src={genre.image} 
+            alt={`${genre.name} music genre cover`}
+            loading="lazy"
+            decoding="async"
+            width={300}
+            height={300}
+            className="w-full h-full object-cover transition-transform duration-300 ease-out"
+         />
+      </motion.div>
 
       {/* 2. Dark Overlay Layer */}
       <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors duration-500 z-10" />
@@ -169,7 +182,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ selectedGenre, onSelectGenre,
       className="relative w-full min-h-[600px] md:min-h-[800px] mb-20 overflow-hidden flex flex-col items-center justify-center"
     >
       {/* Background Container - FULL WIDTH EDGE-TO-EDGE - Optimized for LCP */}
-      <div className="absolute inset-0 z-0 w-full h-full overflow-hidden">
+      <div className="absolute inset-0 z-0 w-full h-full overflow-hidden bg-black">
+        {/* Placeholder color while loading */}
         <motion.img
           style={{
             y: backgroundY,
@@ -180,13 +194,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({ selectedGenre, onSelectGenre,
                   https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&q=80&w=1200 1200w,
                   https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&q=80&w=2000 2000w"
           sizes="100vw"
-          alt="Studio Background"
+          alt="Dark music studio background with purple lighting"
+          width="2000"
+          height="1200"
           initial={{ scale: 1.4, opacity: 0 }}
           animate={{ scale: 1.1, opacity: 1 }}
           transition={{ duration: 1.8, ease: "easeOut" }}
           className="w-full h-full object-cover grayscale-[0.4] contrast-[1.1] brightness-[0.6] blur-[1px]"
           // @ts-ignore
           fetchPriority="high"
+          decoding="sync" // Decode immediately for LCP
         />
 
         {/* Cinematic Film Grain Texture Overlay */}
@@ -216,17 +233,21 @@ const HeroSection: React.FC<HeroSectionProps> = ({ selectedGenre, onSelectGenre,
           </motion.h1>
 
           {/* Search Form - Visible and centered */}
-          <form onSubmit={handleSubmit} className="w-full max-w-3xl relative group mb-16">
+          <form onSubmit={handleSubmit} className="w-full max-w-3xl relative group mb-16" role="search">
+            <label htmlFor="hero-search" className="sr-only">Search beats</label>
             <motion.div
               animate={{
                 scale: isFocused ? 1.05 : 1,
               }}
               className="absolute inset-y-0 left-6 flex items-center pointer-events-none z-10"
+              aria-hidden="true"
             >
               <Search className={cn("w-5 h-5 transition-colors duration-300", isFocused ? "text-primary" : "text-gray-400")} />
             </motion.div>
             <motion.input
-              type="text"
+              id="hero-search"
+              type="search"
+              name="q"
               value={query}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
@@ -242,12 +263,15 @@ const HeroSection: React.FC<HeroSectionProps> = ({ selectedGenre, onSelectGenre,
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
               placeholder="Find your vibe..."
               className="w-full h-16 md:h-18 bg-dark-card/20 backdrop-blur-3xl border rounded-2xl pl-16 pr-40 text-lg md:text-xl outline-none transition-all text-white placeholder:text-gray-600 font-bold"
+              aria-label="Search for beats by name or genre"
             />
             <div className="absolute inset-y-0 right-2 flex items-center">
               <motion.button
+                type="submit"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="h-[calc(100%-1rem)] px-8 bg-primary text-white rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-primary/20"
+                aria-label="Submit search"
               >
                 Discover
               </motion.button>

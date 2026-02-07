@@ -1,33 +1,41 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lejja | Multi Platinum Beats & Sound Kits</title>
+    <meta name="description" content="Premium Trap, Drill, R&B, and Boom Bap beats for professional artists. Buy leases and download instant high-quality audio." />
+    <meta name="theme-color" content="#000000" />
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SonicSphere AI - Producer Portal</title>
-    <meta name="description"
-        content="Lejja - Multi Platinum Beats & Sound Kits. High-quality Trap, Drill, R&B, and Boom Bap beats for professional artists and producers.">
+    <!-- Performance: Preconnect to external domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://images.unsplash.com" />
 
-    <!-- LCP Optimization: Responsive Preload -->
-    <link rel="preload" as="image"
-        href="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&q=80&w=2000"
-        imagesrcset="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&q=80&w=640 640w,
-                       https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&q=80&w=1200 1200w,
-                       https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&q=80&w=2000 2000w"
-        imagesizes="100vw">
+    <!-- Performance: Preload Critical Hero Image (LCP) -->
+    <link 
+      rel="preload" 
+      as="image" 
+      href="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&q=80&w=2000"
+      imagesrcset="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&q=80&w=640 640w,
+                   https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&q=80&w=1200 1200w,
+                   https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&q=80&w=2000 2000w"
+      imagesizes="100vw"
+      fetchpriority="high"
+    />
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Oswald:wght@200;300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <!-- Fonts with display=swap to prevent invisible text -->
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Oswald:wght@200;300;400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <!-- Analytics -->
     <script type="module">
-        import { inject } from '@vercel/analytics';
-        inject();
+      import { inject } from '@vercel/analytics';
+      inject();
     </script>
-</head>
-
-<body>
+  </head>
+  <body>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
-</body>
-
+  </body>
 </html>
