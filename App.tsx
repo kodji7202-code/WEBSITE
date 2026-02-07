@@ -21,17 +21,22 @@ import HeroSection from './components/HeroSection';
 import HowItWorks from './components/HowItWorks';
 import Testimonials from './components/Testimonials';
 import FAQ from './components/FAQ';
-import SoundKitDetail from './components/SoundKitDetail';
-import Footer from './components/Footer';
-import CheckoutModal from './components/CheckoutModal';
-import TermsOfService from './components/TermsOfService';
-import PrivacyPolicy from './components/PrivacyPolicy';
-import RefundPolicy from './components/RefundPolicy';
-import Sitemap from './components/Sitemap';
-import AdminDashboard from './components/AdminDashboard';
-import Services from './components/Services';
-import PerspectiveSection from './components/PerspectiveSection';
 import { supabase } from './lib/supabase';
+import React, { useState, useMemo, useEffect, useRef, Suspense } from 'react';
+
+// Lazy Load Heavy/Secondary Components
+const AdminDashboard = React.lazy(() => import('./components/AdminDashboard'));
+const SoundKitDetail = React.lazy(() => import('./components/SoundKitDetail'));
+const TermsOfService = React.lazy(() => import('./components/TermsOfService'));
+const PrivacyPolicy = React.lazy(() => import('./components/PrivacyPolicy'));
+const RefundPolicy = React.lazy(() => import('./components/RefundPolicy'));
+const Sitemap = React.lazy(() => import('./components/Sitemap'));
+
+const LoadingFallback = () => (
+  <div className="flex h-screen w-full items-center justify-center bg-dark text-primary">
+    <Loader2 className="h-10 w-10 animate-spin" />
+  </div>
+);
 
 // Static definitions for display purposes (prices/names), IDs will come from DB
 const LICENSE_TEMPLATES: Record<string, Omit<License, 'id' | 'stripeId'>> = {
@@ -545,12 +550,14 @@ const App: React.FC = () => {
 
       case 'SoundKitDetail':
         return selectedKit ? (
-          <SoundKitDetail
-            kit={selectedKit}
-            onBack={() => setCurrentView('Sound Kits')}
-            onAddToCart={addSoundKitToCart}
-            isInCart={cart.some(item => item.type === 'soundkit' && item.kit.id === selectedKit.id)}
-          />
+          <Suspense fallback={<LoadingFallback />}>
+            <SoundKitDetail
+              kit={selectedKit}
+              onBack={() => setCurrentView('Sound Kits')}
+              onAddToCart={addSoundKitToCart}
+              isInCart={cart.some(item => item.type === 'soundkit' && item.kit.id === selectedKit.id)}
+            />
+          </Suspense>
         ) : null;
 
       case 'Services':
@@ -566,19 +573,39 @@ const App: React.FC = () => {
       // ... (existing imports, skipping to renderContent switch)
 
       case 'Terms':
-        return <TermsOfService onBack={() => setCurrentView('Beats')} />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <TermsOfService onBack={() => setCurrentView('Beats')} />
+          </Suspense>
+        );
 
       case 'Privacy':
-        return <PrivacyPolicy onBack={() => setCurrentView('Beats')} />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <PrivacyPolicy onBack={() => setCurrentView('Beats')} />
+          </Suspense>
+        );
 
       case 'Refunds':
-        return <RefundPolicy onBack={() => setCurrentView('Beats')} />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <RefundPolicy onBack={() => setCurrentView('Beats')} />
+          </Suspense>
+        );
 
       case 'Sitemap':
-        return <Sitemap onBack={() => setCurrentView('Beats')} onNavigate={setCurrentView} />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <Sitemap onBack={() => setCurrentView('Beats')} onNavigate={setCurrentView} />
+          </Suspense>
+        );
 
       case 'Admin':
-        return <AdminDashboard />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminDashboard />
+          </Suspense>
+        );
 
       default:
         return null;
