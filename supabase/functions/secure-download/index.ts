@@ -2,12 +2,28 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import Stripe from "https://esm.sh/stripe@14.10.0"
 
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined;
+  };
+};
+
+interface FileMetadata {
+  name: string;
+  url: string;
+  license: string;
+}
+
+interface SignedFile extends FileMetadata {
+  downloadUrl: string;
+}
+
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders })
     }
@@ -26,7 +42,7 @@ serve(async (req) => {
             httpClient: Stripe.createFetchHttpClient(),
         })
 
-        const { session_id } = await req.json()
+        const { session_id }: { session_id: string } = await req.json()
         if (!session_id) throw new Error('Session ID missing');
 
         // 1. Verify Stripe Session
@@ -36,7 +52,7 @@ serve(async (req) => {
         }
 
         // 2. Parse Metadata (Files)
-        let files = [];
+        let files: FileMetadata[] = [];
         if (session.metadata && session.metadata.files_json) {
             files = JSON.parse(session.metadata.files_json);
         } else {
@@ -44,20 +60,17 @@ serve(async (req) => {
         }
 
         // 3. Generate Signed URLs
-        const signedFiles = await Promise.all(files.map(async (file: any) => {
-            // file.url ex: "https://[id].supabase.co/storage/v1/object/public/kits/my-file.zip"
-            // or relative path if we changed it, but currently it's full URL.
-
+        const signedFiles: SignedFile[] = await Promise.all(files.map(async (file: FileMetadata) => {
             let bucket = '';
             let path = '';
 
-            // Simple heuristic to detect bucket and path
+            // Detect bucket and path from URL
             if (file.url.includes('/kits/')) {
                 bucket = 'kits';
                 path = file.url.split('/kits/')[1];
             } else if (file.url.includes('/beats/')) {
                 bucket = 'beats';
-                path = file.url.split('/beats/')[1]; // usually mp3/wav
+                path = file.url.split('/beats/')[1];
             } else if (file.url.includes('/stems/')) {
                 bucket = 'stems';
                 path = file.url.split('/stems/')[1];
@@ -75,7 +88,7 @@ serve(async (req) => {
                 }
             }
 
-            // Fallback (if public or parse fail, return original - though it will fail if bucket is private)
+            // Fallback: return original URL
             return { ...file, downloadUrl: file.url };
         }));
 
@@ -87,9 +100,10 @@ serve(async (req) => {
             }
         )
 
-    } catch (error) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
         return new Response(
-            JSON.stringify({ error: error.message }),
+            JSON.stringify({ error: message }),
             {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 status: 400,

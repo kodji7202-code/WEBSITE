@@ -60,12 +60,29 @@ const FAQ: React.FC<FAQProps> = ({ onContactClick, isContactMode = false }) => {
     setError(null);
 
     const formData = new FormData(e.currentTarget);
-    const data = {
-      full_name: formData.get('full_name'),
-      email: formData.get('email'),
-      subject: formData.get('subject'),
-      message: formData.get('message'),
-    };
+    const fullName = (formData.get('full_name') as string || '').trim();
+    const emailValue = (formData.get('email') as string || '').trim();
+    const subject = (formData.get('subject') as string || '').trim();
+    const message = (formData.get('message') as string || '').trim();
+
+    // Validation
+    if (fullName.length < 2) {
+      setError('Please enter your full name (at least 2 characters).');
+      setSending(false);
+      return;
+    }
+    if (!emailValue || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+      setError('Please enter a valid email address.');
+      setSending(false);
+      return;
+    }
+    if (message.length < 10) {
+      setError('Please write a message (at least 10 characters).');
+      setSending(false);
+      return;
+    }
+
+    const data = { full_name: fullName, email: emailValue, subject, message };
 
     try {
       const { error: dbError } = await supabase

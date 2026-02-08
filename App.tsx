@@ -17,11 +17,13 @@ import {
 import { Track, View, SoundKit, CartItem, License } from './types';
 import { cn, formatTime } from './lib/utils';
 import { supabase } from './lib/supabase';
+import { LICENSE_TEMPLATES, MOCK_TRACKS, PREVIEW_DURATION_LIMIT, PLACEHOLDER_COVER } from './lib/constants';
 
 // Critical Components (Static Import) - Only Hero and TrackCard needed for LCP
 import TrackCard from './components/TrackCard';
 import HeroSection from './components/HeroSection';
 import Footer from './components/Footer';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Lazy Load Secondary Components (Below Fold)
 const HowItWorks = React.lazy(() => import('./components/HowItWorks'));
@@ -38,6 +40,7 @@ const TermsOfService = React.lazy(() => import('./components/TermsOfService'));
 const PrivacyPolicy = React.lazy(() => import('./components/PrivacyPolicy'));
 const RefundPolicy = React.lazy(() => import('./components/RefundPolicy'));
 const Sitemap = React.lazy(() => import('./components/Sitemap'));
+const CookieConsent = React.lazy(() => import('./components/CookieConsent'));
 
 const LoadingFallback = () => (
   <div className="flex h-screen w-full items-center justify-center bg-dark text-primary">
@@ -45,41 +48,7 @@ const LoadingFallback = () => (
   </div>
 );
 
-// Static definitions for display purposes (prices/names), IDs will come from DB
-const LICENSE_TEMPLATES: Record<string, Omit<License, 'id' | 'stripeId'>> = {
-  mp3: { name: 'MP3 LEASE', price: 29.99, description: 'MP3 file only' },
-  wav: { name: 'WAV LEASE', price: 49.99, description: 'High quality WAV' },
-  unlimited: { name: 'UNLIMITED', price: 199.99, description: 'Unlimited usage + Stems' }
-};
-
-const MOCK_TRACKS: Track[] = [
-  {
-    id: 'mock1',
-    title: 'MIDNIGHT TOKYO',
-    artist: 'Lejja',
-    bpm: 140,
-    key: 'Gm',
-    duration: '3:12',
-    coverUrl: 'https://images.unsplash.com/photo-1514525253440-b39345208668?auto=format&fit=crop&q=80&w=400',
-    audioUrl: '',
-    price: 29.99,
-    genre: 'Trap',
-    mp3Path: 'mock'
-  },
-  {
-    id: 'mock2',
-    title: 'SAHARA DUST',
-    artist: 'Lejja',
-    bpm: 144,
-    key: 'Cm',
-    duration: '2:45',
-    coverUrl: 'https://images.unsplash.com/photo-1542359649-31e03cd4d909?auto=format&fit=crop&q=80&w=400',
-    audioUrl: '',
-    price: 29.99,
-    genre: 'Drill',
-    mp3Path: 'mock'
-  }
-];
+// LICENSE_TEMPLATES, MOCK_TRACKS, PREVIEW_DURATION_LIMIT, PLACEHOLDER_COVER imported from lib/constants
 
 
 
@@ -121,6 +90,7 @@ const App: React.FC = () => {
   // Filtering & UI
   const [activeGenre, setActiveGenre] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [previewLimitToast, setPreviewLimitToast] = useState(false);
 
   // -------------------------------------------------------------------------
   // AUDIO PLAYER LOGIC
@@ -165,12 +135,13 @@ const App: React.FC = () => {
   const handleTimeUpdate = () => {
     if (audioRef.current) {
       const time = audioRef.current.currentTime;
-      // LIMIT PREVIEW TO 90 SECONDS
-      if (time >= 90) {
+      // LIMIT PREVIEW TO configured seconds
+      if (time >= PREVIEW_DURATION_LIMIT) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
         setIsPlaying(false);
-        // Optional: You could add a toast here saying "Purchase to hear full track"
+        setPreviewLimitToast(true);
+        setTimeout(() => setPreviewLimitToast(false), 4000);
       }
       setCurrentTime(time);
     }
@@ -266,8 +237,6 @@ const App: React.FC = () => {
 
         setGlobalLicenses(mappedLicenses);
 
-        setGlobalLicenses(mappedLicenses);
-
         // 2. Fetch Beats (Independent Try/Catch)
         try {
           const { data: beatsData, error: beatsError } = await supabase
@@ -287,7 +256,7 @@ const App: React.FC = () => {
               bpm: b.bpm || 140,
               key: b.key || 'Cm',
               duration: '3:00',
-              coverUrl: b.cover_path || MOCK_TRACKS[0].coverUrl,
+              coverUrl: b.cover_path || PLACEHOLDER_COVER,
               audioUrl: b.preview_path || '',
               price: 29.99,
               genre: b.genre || 'Trap',
@@ -324,7 +293,7 @@ const App: React.FC = () => {
               title: k.title,
               type: k.type,
               price: k.price,
-              imageUrl: k.cover_path || 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&q=80&w=600',
+              imageUrl: k.cover_path || PLACEHOLDER_COVER,
               description: k.description,
               coverUrl: k.cover_path,
               fileUrl: k.file_path,
@@ -656,7 +625,6 @@ const App: React.FC = () => {
           <button onClick={() => setIsCartOpen(true)} className="relative p-2 text-gray-400 hover:text-white">
             <ShoppingCart className="w-6 h-6" />
             {cart.length > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-white text-[9px] font-black rounded-full flex items-center justify-center">{cart.length}</span>}
-            {cart.length > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-white text-[9px] font-black rounded-full flex items-center justify-center">{cart.length}</span>}
           </button>
 
           {/* Mobile Menu Button */}
@@ -724,12 +692,34 @@ const App: React.FC = () => {
       </AnimatePresence>
 
       <main className="w-full flex-grow">
-        <AnimatePresence mode="wait">
-          {renderContent()}
-        </AnimatePresence>
+        <ErrorBoundary>
+          <AnimatePresence mode="wait">
+            {renderContent()}
+          </AnimatePresence>
+        </ErrorBoundary>
       </main>
 
       <Footer onNavigate={setCurrentView} />
+
+      {/* Preview Limit Toast */}
+      <AnimatePresence>
+        {previewLimitToast && (
+          <motion.div
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -20, opacity: 0 }}
+            className="fixed top-24 left-1/2 -translate-x-1/2 z-[200] bg-dark-card border border-primary/30 px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3"
+          >
+            <span className="text-primary text-xs font-black uppercase tracking-widest">Preview ended</span>
+            <span className="text-gray-400 text-xs">Purchase to hear the full track</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* GDPR Cookie Consent */}
+      <Suspense fallback={null}>
+        <CookieConsent />
+      </Suspense>
 
       {/* Hidden Admin Entry */}
       <div className="fixed bottom-0 right-0 p-1 opacity-0 hover:opacity-100 z-[9999]">

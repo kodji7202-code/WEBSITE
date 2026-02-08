@@ -15,12 +15,12 @@ const getEnv = (key: string) => {
   return undefined;
 };
 
-// Use environment variables if available, otherwise fallback to the provided values
-const supabaseUrl = getEnv('VITE_SUPABASE_URL') || getEnv('NEXT_PUBLIC_SUPABASE_URL') || 'https://ncqaiywmkxcwfqnszldf.supabase.co';
-const supabaseAnonKey = getEnv('VITE_SUPABASE_ANON_KEY') || getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY') || 'sb_publishable_JTaPDeiR-VmkkvWrBzWMFQ_ba9m3G-R';
+// Use environment variables - no hardcoded fallbacks for security
+const supabaseUrl = getEnv('VITE_SUPABASE_URL') || getEnv('NEXT_PUBLIC_SUPABASE_URL');
+const supabaseAnonKey = getEnv('VITE_SUPABASE_ANON_KEY') || getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY');
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+  throw new Error('Missing Supabase environment variables. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env.local file.');
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
