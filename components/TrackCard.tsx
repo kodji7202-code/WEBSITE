@@ -83,7 +83,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, availableLicenses, isActiv
         animate="animate"
         whileHover="hover"
         className={cn(
-          "group flex items-center gap-4 p-3 rounded-xl transition-all duration-300 border cursor-pointer relative overflow-hidden",
+          "group flex items-center gap-4 p-3 rounded-xl transition-all duration-300 border cursor-pointer relative",
           isActive
             ? "bg-dark-card border-primary/40 shadow-xl shadow-primary/10"
             : "bg-dark-soft/40 border-white/5 hover:bg-dark-soft/60"
@@ -92,7 +92,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, availableLicenses, isActiv
       >
         {/* Spotlight Effect - Intensified */}
         <div
-          className="pointer-events-none absolute -inset-px transition-opacity duration-300 z-0"
+          className="pointer-events-none absolute -inset-px transition-opacity duration-300 z-0 rounded-xl overflow-hidden"
           style={{
             opacity,
             background: `radial-gradient(500px circle at ${position.x}px ${position.y}px, rgba(168,85,247,0.15), transparent 40%)`
