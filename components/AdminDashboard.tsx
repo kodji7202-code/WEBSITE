@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Upload, Save, Music, AlertCircle, CheckCircle2, Trash2, RefreshCw, Database, Lock, LogIn, FileAudio, FileImage, FileArchive, Mail, MessageSquare } from 'lucide-react';
+import { Upload, Save, Music, AlertCircle, CheckCircle2, Trash2, RefreshCw, Database, Lock, LogIn, LogOut, FileAudio, FileImage, FileArchive, Mail, MessageSquare } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Track, ContactMessage } from '../types';
 
@@ -13,29 +13,52 @@ const AdminDashboard: React.FC = () => {
   const [fetching, setFetching] = useState(true);
   const [activeTab, setActiveTab] = useState<'upload' | 'inbox' | 'soundkits'>('upload');
 
-  // Auth State
+  // Auth State - uses Supabase Auth
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [username, setUsername] = useState('');
+  const [authLoading, setAuthLoading] = useState(true);
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   // Upload States
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    // Check session storage on mount
-    if (sessionStorage.getItem('admin_auth') === 'true') {
-      setIsAuthenticated(true);
-    }
+    // Check for existing Supabase session on mount
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+      setAuthLoading(false);
+    };
+    checkSession();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === 'claudiu2169' && password === 'Qw12er342169') {
-      setIsAuthenticated(true);
-      sessionStorage.setItem('admin_auth', 'true');
+    setAuthLoading(true);
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (authError) {
+      setError(authError.message);
+      setAuthLoading(false);
     } else {
-      alert('Invalid Credentials');
+      setIsAuthenticated(true);
+      setAuthLoading(false);
+      setError(null);
     }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setIsAuthenticated(false);
   };
 
   // Updated Form Data to match New Schema
@@ -158,18 +181,34 @@ const AdminDashboard: React.FC = () => {
     });
   };
 
+  const validateKitForm = (): string | null => {
+    if (!kitFormData.title.trim()) return 'Kit title is required.';
+    if (kitFormData.title.trim().length < 2) return 'Kit title must be at least 2 characters.';
+    if (kitFormData.price <= 0) return 'Price must be greater than $0.';
+    if (kitFormData.price > 9999) return 'Price seems too high. Please check.';
+    if (!kitFormData.cover_path) return 'Cover image is required. Please upload one.';
+    if (!kitFormData.file_path) return 'Kit file (ZIP) is required.';
+    return null;
+  };
+
   const handleKitSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setSuccess(false);
 
+    const validationError = validateKitForm();
+    if (validationError) {
+      setError(validationError);
+      setLoading(false);
+      return;
+    }
+
     try {
-      console.log("Submitting Kit Data:", kitFormData);
       const { error: dbError } = await supabase
         .from('sound_kits')
         .insert([{
-          title: kitFormData.title,
+          title: kitFormData.title.trim(),
           type: kitFormData.type,
           price: kitFormData.price,
           description: kitFormData.description,
@@ -300,18 +339,36 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const validateBeatForm = (): string | null => {
+    if (!formData.name.trim()) return 'Beat name is required.';
+    if (formData.name.trim().length < 2) return 'Beat name must be at least 2 characters.';
+    if (formData.bpm < 40 || formData.bpm > 300) return 'BPM must be between 40 and 300.';
+    if (!formData.key.trim()) return 'Musical key is required.';
+    if (!formData.cover_path) return 'Cover image is required. Please upload one.';
+    if (!formData.preview_path) return 'Preview MP3 is required. Please upload one.';
+    if (!formData.mp3_path) return 'Full MP3 file is required for sale.';
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setSuccess(false);
 
+    const validationError = validateBeatForm();
+    if (validationError) {
+      setError(validationError);
+      setLoading(false);
+      return;
+    }
+
     try {
       const { error: dbError } = await supabase
         .from('beats')
         .insert([{
-          name: formData.name,
-          slug: formData.slug || formData.name.toLowerCase().replace(/\s+/g, '-'),
+          name: formData.name.trim(),
+          slug: formData.slug.trim() || formData.name.trim().toLowerCase().replace(/\s+/g, '-'),
           bpm: formData.bpm,
           key: formData.key,
           genre: formData.genre,
@@ -359,6 +416,14 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center px-6">
+        <RefreshCw className="animate-spin text-primary" size={32} />
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center px-6">
@@ -375,15 +440,18 @@ const AdminDashboard: React.FC = () => {
           <h2 className="text-2xl font-black uppercase text-center text-white mb-2 tracking-tighter italic">Admin Access</h2>
           <p className="text-gray-500 text-center text-xs mb-8 uppercase tracking-widest">Secure Restricted Area</p>
 
+          {error && <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs font-bold text-center">{error}</div>}
+
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-gray-500">Username</label>
+              <label className="text-[10px] uppercase font-bold text-gray-500">Email</label>
               <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-dark-soft border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary outline-none transition-colors"
-                placeholder="Enter username"
+                placeholder="Enter admin email"
+                required
               />
             </div>
             <div className="space-y-1">
@@ -394,11 +462,13 @@ const AdminDashboard: React.FC = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-dark-soft border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary outline-none transition-colors"
                 placeholder="Enter password"
+                required
               />
             </div>
             <button
               type="submit"
-              className="w-full py-4 bg-primary text-white font-black uppercase tracking-[0.2em] rounded-xl hover:bg-primary/80 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 mt-4"
+              disabled={authLoading}
+              className="w-full py-4 bg-primary text-white font-black uppercase tracking-[0.2em] rounded-xl hover:bg-primary/80 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 mt-4 disabled:opacity-50"
             >
               <LogIn size={18} /> Authenticate
             </button>
@@ -415,6 +485,14 @@ const AdminDashboard: React.FC = () => {
       <div className="bg-dark/50 border border-white/5 rounded-3xl p-8 max-w-6xl mx-auto backdrop-blur-3xl relative overflow-hidden h-[800px]">
 
         {/* Navigation Tabs */}
+        <div className="flex gap-4 mb-8 items-center">
+          <button
+            onClick={handleLogout}
+            className="ml-auto px-4 py-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all font-bold uppercase tracking-widest text-[10px] flex items-center gap-2"
+          >
+            <LogOut size={14} /> Sign Out
+          </button>
+        </div>
         <div className="flex gap-4 mb-8">
           <button
             onClick={() => setActiveTab('upload')}

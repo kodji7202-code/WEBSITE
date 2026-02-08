@@ -33,11 +33,16 @@ const FooterLink: React.FC<FooterLinkProps> = ({ label, onClick, disableScroll }
 const Footer: React.FC<{ onNavigate: (view: View) => void }> = ({ onNavigate }) => {
   const currentYear = new Date().getFullYear();
   const [subscribed, setSubscribed] = useState(false);
+  const [subscribing, setSubscribing] = useState(false);
   const [email, setEmail] = useState('');
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
+    setSubscribing(true);
+    // Simulate API call delay (replace with actual newsletter API later)
+    await new Promise(resolve => setTimeout(resolve, 800));
+    setSubscribing(false);
     setSubscribed(true);
     setEmail('');
     setTimeout(() => setSubscribed(false), 3000);
@@ -138,9 +143,15 @@ const Footer: React.FC<{ onNavigate: (view: View) => void }> = ({ onNavigate }) 
               <button
                 type="submit"
                 className="absolute right-2 top-2 bottom-2 px-4 bg-white text-dark rounded-lg flex items-center justify-center hover:bg-primary hover:text-white transition-all disabled:opacity-50"
-                disabled={subscribed}
+                disabled={subscribed || subscribing}
               >
-                {subscribed ? <CheckCircle2 size={16} className="text-green-500" /> : <Mail size={16} />}
+                {subscribing ? (
+                  <Mail size={16} className="animate-pulse" />
+                ) : subscribed ? (
+                  <CheckCircle2 size={16} className="text-green-500" />
+                ) : (
+                  <Mail size={16} />
+                )}
               </button>
               <AnimatePresence>
                 {subscribed && (
