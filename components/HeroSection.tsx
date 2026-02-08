@@ -277,6 +277,18 @@ const HeroSection: React.FC<HeroSectionProps> = ({ selectedGenre, onSelectGenre,
               </motion.button>
             </div>
           </form>
+
+          {/* Primary CTA - Scroll Down */}
+          <motion.a
+            href="#trending-catalog"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="hidden md:inline-flex items-center gap-2 mb-12 px-8 py-3 rounded-full bg-white/5 border border-white/10 hover:bg-white hover:text-dark hover:scale-105 transition-all cursor-pointer group"
+          >
+            <span className="text-xs font-black uppercase tracking-[0.2em]">Explore Full Catalog</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-y-1 transition-transform"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+          </motion.a>
         </motion.div>
 
         {/* Genres Grid - Force 5 columns on mobile */}

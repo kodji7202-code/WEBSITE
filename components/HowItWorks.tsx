@@ -180,10 +180,16 @@ const HowItWorks: React.FC = () => {
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
               className={cn(
-                "group flex flex-col p-8 rounded-lg transition-all duration-500 border h-full",
-                "bg-dark-card border-white/5 text-white hover:bg-white hover:text-dark hover:border-white hover:shadow-[0_20px_80px_rgba(255,255,255,0.1)] hover:scale-105 hover:z-10"
+                "group flex flex-col p-8 rounded-lg transition-all duration-500 border h-full relative",
+                "bg-dark-card text-white hover:bg-white hover:text-dark hover:border-white hover:shadow-[0_20px_80px_rgba(255,255,255,0.1)] hover:scale-105 hover:z-10",
+                index === 1 ? "border-primary shadow-[0_0_30px_rgba(168,85,247,0.15)] scale-105 z-10" : "border-white/5"
               )}
             >
+              {index === 1 && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg border border-white/20">
+                  Most Popular
+                </div>
+              )}
               <h4 className="text-2xl font-black uppercase mb-2 tracking-tighter italic group-hover:text-dark">{lic.name}</h4>
               <div className="flex items-baseline gap-1 mb-1">
                 <span className="text-4xl font-black tracking-tighter group-hover:text-dark">{lic.price}</span>

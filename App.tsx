@@ -798,11 +798,11 @@ const App: React.FC = () => {
           <div className="flex flex-col items-center gap-1 md:gap-2.5 flex-grow max-w-2xl">
             <div className="flex items-center gap-4 md:gap-10">
               <button onClick={() => setIsShuffle(!isShuffle)} className={cn(isShuffle ? "text-primary" : "text-gray-700", "hidden md:block")}><Shuffle size={16} /></button>
-              <button onClick={() => handleSkip('prev')} className="text-gray-500 hover:text-white"><SkipBack size={18} fill="currentColor" className="md:w-5 md:h-5" /></button>
-              <button onClick={() => setIsPlaying(!isPlaying)} className="w-10 h-10 md:w-14 md:h-14 rounded-full bg-white text-dark flex items-center justify-center shadow-2xl hover:bg-primary hover:text-white transition-colors">
-                {isPlaying ? <Pause size={20} fill="currentColor" className="md:w-7 md:h-7" /> : <Play size={20} fill="currentColor" className="ml-1 md:w-7 md:h-7" />}
+              <button onClick={() => handleSkip('prev')} className="p-3 text-gray-500 hover:text-white active:scale-95 transition-transform"><SkipBack size={20} fill="currentColor" className="md:w-6 md:h-6" /></button>
+              <button onClick={() => setIsPlaying(!isPlaying)} className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-white text-dark flex items-center justify-center shadow-2xl hover:bg-primary hover:text-white transition-all hover:scale-105 active:scale-95">
+                {isPlaying ? <Pause size={24} fill="currentColor" className="md:w-8 md:h-8" /> : <Play size={24} fill="currentColor" className="ml-1 md:w-8 md:h-8" />}
               </button>
-              <button onClick={() => handleSkip('next')} className="text-gray-500 hover:text-white"><SkipForward size={18} fill="currentColor" className="md:w-5 md:h-5" /></button>
+              <button onClick={() => handleSkip('next')} className="p-3 text-gray-500 hover:text-white active:scale-95 transition-transform"><SkipForward size={20} fill="currentColor" className="md:w-6 md:h-6" /></button>
               <button onClick={() => setIsRepeat(!isRepeat)} className={cn(isRepeat ? "text-primary" : "text-gray-700", "hidden md:block")}><Repeat size={16} /></button>
             </div>
 
